@@ -21,6 +21,11 @@ tm_err_t TM_WEAK tm_load  (tm_mdl_t* mdl, const uint8_t* bin, uint8_t*buf, tm_cb
     if(mdl_bin->mdl_type != TM_MDL_TYPE) return TM_ERR_MDLTYPE;
     mdl->b          = mdl_bin;
     mdl->cb         = (void*)cb;
+#ifdef __riscv
+    if(buf == NULL || mdl->b->sub_size > 0) {
+	    return TM_ERR_OOM;
+    }
+#else
     if(buf == NULL) {
         mdl->buf        = (uint8_t*)tm_malloc(mdl->b->buf_size);
         if(mdl->buf == NULL) return TM_ERR_OOM;
@@ -33,6 +38,7 @@ tm_err_t TM_WEAK tm_load  (tm_mdl_t* mdl, const uint8_t* bin, uint8_t*buf, tm_cb
         mdl->subbuf = (uint8_t*)tm_malloc(mdl->b->sub_size);
         if(mdl->subbuf == NULL) return TM_ERR_OOM;
     } else mdl->subbuf = NULL;
+#endif
     mdl->layer_i    = 0;
     mdl->layer_body = mdl->b->layers_body;
     memcpy((void*)in, (void*)mdl->b->in_dims, sizeof(tm_mat_t));
@@ -43,7 +49,9 @@ tm_err_t TM_WEAK tm_load  (tm_mdl_t* mdl, const uint8_t* bin, uint8_t*buf, tm_cb
 //remove model
 void TM_WEAK tm_unload(tm_mdl_t* mdl)
 {
+#ifndef __riscv
     if(mdl->main_alloc) tm_free(mdl->buf);
+#endif
     return;
 }
 
