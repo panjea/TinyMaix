@@ -25,6 +25,10 @@ tm_err_t TM_WEAK tm_load  (tm_mdl_t* mdl, const uint8_t* bin, uint8_t*buf, tm_cb
     if(buf == NULL || mdl->b->sub_size > 0) {
 	    return TM_ERR_OOM;
     }
+    mdl->buf = buf;
+    mdl->main_alloc = 0;
+    mdl->subbuf = NULL;
+
 #else
     if(buf == NULL) {
         mdl->buf        = (uint8_t*)tm_malloc(mdl->b->buf_size);
